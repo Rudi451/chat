@@ -1,0 +1,12 @@
+.app-container {
+	display: grid;
+	grid-template-columns: 1fr 2fr 3fr;
+	height: 100vh;
+	gap: 1rem;
+}
+
+.app-container > * {
+	border: 1px solid #ccc;
+	padding: 1rem;
+	background: #f9f9f9;
+}
