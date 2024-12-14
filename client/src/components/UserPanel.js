@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
-import icon1 from '../images/Emblem-person-blue.svg.png';
-import icon2 from '../images/Emblem-person-brown.svg.png';
-import icon3 from '../images/Emblem-person-green.svg.png';
-import icon4 from '../images/User_icon_3.svg.png';
+
+import '../styles/App.css';
+import RandomIcon from './RandomIcon';
+import noIcon from './assets/user_icons/Emblem-person-grey.svg copy.png';
+import SearchInput from './SearchInput';
 
 const UserPanel = () => {
 	const [loggedIn, setLoggedIn] = useState(false);
@@ -10,21 +11,23 @@ const UserPanel = () => {
 	const handleLoginLogout = () => setLoggedIn(!loggedIn);
 
 	return (
-		<div>
-			<h3>Users</h3>
-			<button onClick={handleLoginLogout}>
-				{loggedIn ? 'Log Out' : 'Log In'}
-			</button>
-			<div className='user-info'>
+		<div className='user-top'>
+			<div className='user-section'>
 				{loggedIn ? (
-					<div>
-						<img src={icon1} height={30} width={30}></img>
+					<div className='user-info'>
+						<RandomIcon />
 						<p>John Doe</p>
 					</div>
 				) : (
-					<p>Please log in</p>
+					<img src={noIcon} height={50} width={50}></img>
 				)}
+
+				<button onClick={handleLoginLogout}>
+					{loggedIn ? 'Log out' : 'Log in'}
+				</button>
 			</div>
+
+			<SearchInput />
 		</div>
 	);
 };

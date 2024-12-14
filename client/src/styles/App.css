@@ -1,4 +1,4 @@
-.app-container {
+/* .app-container {
 	display: grid;
 	grid-template-columns: 1fr 2fr 3fr;
 	height: 100vh;
@@ -9,4 +9,74 @@
 	border: 1px solid #ccc;
 	padding: 1rem;
 	background: #f9f9f9;
+} */
+
+.app-container {
+	margin: 20px;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	/* grid-template-rows: 1fr 1fr; */
+	height: 100vh; /* Ganze Bildschirmhöhe */
+}
+
+.left-section {
+	display: flex;
+	flex-direction: column; /* Horizontal anordnen */
+	border-right: 1px solid rgb(224, 224, 224);
+}
+
+.right-section {
+}
+
+.user-section {
+	padding: 20px;
+	display: flex;
+	justify-content: space-between;
+}
+.user-info {
+	display: flex;
+	justify-content: space-between;
+	background-color: none;
+}
+.user-section button {
+	/* all: unset; */
+
+	display: block;
+	padding: 5px 5px;
+	background-color: white;
+	color: rgb(9, 189, 189);
+	border: 1px solid rgba(171, 171, 171, 0.704);
+	border-radius: 15px;
+	font-size: 16px;
+	font-weight: bold;
+	text-align: center;
+	cursor: pointer;
+}
+.user-section button:hover {
+	background-color: #c7f8d0;
+}
+.user-section button:active {
+	background-color: #e0e0e0;
+}
+
+.user-top {
+	background-color: rgba(247, 238, 227, 0.662);
+	border-bottom: 1px solid rgb(224, 224, 224);
+}
+
+.sendButton {
+	all: unset;
+	cursor: pointer;
+	position: absolute;
+	display: inline-block;
+	right: 10px;
+}
+/* .sendButton::before {
+	content: url('../components/assets/icons/send.png');
+	} */
+.buttonIcon {
+	transform: translateY(10%);
+	content: url('../components/assets/icons/send.png');
+	width: 25px;
+	height: 25px;
 }
