@@ -16,7 +16,7 @@ const UserPanel = () => {
 				{loggedIn ? (
 					<div className='user-info'>
 						<RandomIcon />
-						<p>John Doe</p>
+						<p>John Doeg</p>
 					</div>
 				) : (
 					<img src={noIcon} height={50} width={50}></img>
