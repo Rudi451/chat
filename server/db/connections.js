@@ -8,7 +8,7 @@ const client = new MongoClient(uri, {
 		deprecationErrors: true,
 	},
 });
-console.log('Atlas uri:', process.env.ATLAS_URI);
+
 try {
 	// Connect the client to the server
 	await client.connect();

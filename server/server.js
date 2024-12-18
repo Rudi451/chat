@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import records from './routes/record.js';
+import resourcesRouter from './routes/resource-routes.js';
 
 import * as dotenv from 'dotenv';
 
@@ -11,7 +11,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use('/record', records);
+app.use('/api/resources', resourcesRouter);
 
 // start the Express server
 app.listen(PORT, () => {
