@@ -1,11 +1,11 @@
 export default class HttpError extends Error {
-	constructor(message, statusCode) {
+	constructor(message, errorCode) {
 		super(message);
-		this.statusCode = statusCode;
+		this.errorCode = errorCode;
 
 		// Behalte den Stack-Trace für die ursprüngliche Fehlerstelle
 		if (Error.captureStackTrace) {
-			Error.captureStackTrace(this, CustomError);
+			Error.captureStackTrace(this, HttpError);
 		}
 	}
 }

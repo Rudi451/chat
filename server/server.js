@@ -12,10 +12,12 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 app.use('/api/resources', resourcesRouter);
 
-// app.use(CentralErrorHandler);
+//middleware for correct display of Server-Error Responses
 app.use(CentralErrorHandler);
+
 // start the Express server
 app.listen(PORT, () => {
 	console.log(`Server listening on port ${PORT}`);
