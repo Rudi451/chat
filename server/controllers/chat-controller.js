@@ -21,28 +21,42 @@ export const createChat = async (req, res, next) => {
 	res.status(200).send('new chat not ready');
 };
 
-export const newMessage = async (req, res, next) => {
-	// we need username 1 and username 2
-	// we need date
-	//
-	const {username1, username2, message} = req.query;
+export const getAllChats = async (req, res, next) => {
+	// let collection = await db.collection('chats').find();
+	let collection = await db.collection('chats').find().toArray();
 
-	const newChatData = {
-		username1,
-		username2,
-		messages: [
-			{
-				from: username2,
-				message,
-				receivedAt: new Date(),
-			},
-		],
-		createdAt: new Date(),
-	};
-	const result = await db.collection('chat').updateOne(
-		{_id: new MongoClient.ObjectId('67609e4d0038da38f482ca34')}, //chat id
-		{$push: {message: newChatData}}
-	);
+	res.send(collection).status(200);
+};
 
-	res.send('not ready');
+export const updateChat = async (req, res, next) => {
+	const {from, to, message} = req.query;
+
+	if (!from || !to || !message) {
+		return res
+			.status(400)
+			.json({error: 'Missing required parameters: from, to, or message.'});
+	}
+
+	try {
+		const chatsCollection = db.collection('chats');
+
+		// Suchen nach dem Record
+		const filter = {username1: from, username2: to};
+		const update = {
+			$push: {messages: {from, message, created: new Date()}}, // Fügt die neue Nachricht zum Array hinzu
+		};
+
+		const options = {upsert: true}; // Falls kein Dokument gefunden wird, wird ein neues erstellt
+
+		const result = await chatsCollection.updateOne(filter, update, options);
+
+		if (result.matchedCount > 0) {
+			res.json({message: 'Message added to existing chat.'});
+		} else {
+			res.json({message: 'New chat created, and message added.'});
+		}
+	} catch (err) {
+		console.error('Error updating chat:', err);
+		res.status(500).json({error: 'Internal server error.'});
+	}
 };

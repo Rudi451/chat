@@ -1,6 +1,10 @@
 import express from 'express';
 import db from '../db/connections.js';
-import {createChat} from '../controllers/chat-controller.js';
+import {
+	createChat,
+	getAllChats,
+	updateChat,
+} from '../controllers/chat-controller.js';
 
 // This help convert the id from string to ObjectId for the _id.
 import {ObjectId} from 'mongodb';
@@ -16,13 +20,6 @@ router.get('/', async (req, res) => {
 //___________________________________________________________
 //// Chats Routes
 
-router.get('/chats', async (req, res) => {
-	// let collection = await db.collection('chats').find();
-	let collection = await db.collection('chats').find().toArray();
-
-	res.send(collection).status(200);
-});
-
 // This section will help you get a single record by id
 // router.get('/:id', async (req, res) => {
 // 	let collection = await db.collection('records');
@@ -33,9 +30,10 @@ router.get('/chats', async (req, res) => {
 // 	else res.send(result).status(200);
 // });
 
-/**
- * Create new chat in the database
- */
+router.get('/chats', getAllChats);
+
+router.put('/chats', updateChat);
+
 router.post('/chats/new', createChat);
 
 // This section will help you update a record by id.
