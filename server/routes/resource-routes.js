@@ -5,16 +5,20 @@ import HttpError from '../helpers/HttpError.js';
 import {
 	createChat,
 	getAllChats,
-	updateChatMessage,
+	createMessage,
 	deleteChat,
+	chatSearch,
 	getChat,
 	updateChatName,
+	updateChatMessage,
 } from '../controllers/chat-controller.js';
+import {login} from '../controllers/user-controller.js';
+import {isLogged} from '../middleware/isLogged.js';
 
 const router = express.Router();
 
 // Get collections list
-router.get('/', async (req, res) => {
+router.get('/', isLogged, async (req, res) => {
 	let collection = await db.listCollections().toArray();
 
 	res.send(collection).status(200);
@@ -22,15 +26,22 @@ router.get('/', async (req, res) => {
 //___________________________________________________________
 //// Chats Routes
 
-router.get('/chats', getAllChats);
+router.get('/chats', isLogged, getAllChats);
 
-router.get('/chat', getChat);
+router.get('/chat', isLogged, getChat);
 
-router.put('/chats/update', updateChatMessage);
-router.put('/chats/updateName', updateChatName);
+router.get('/chats/search', isLogged, chatSearch);
 
-router.post('/chats/new', createChat);
+router.post('/chats/new', isLogged, createChat);
 
-router.delete('/chats/delete/:id', deleteChat);
+router.post('/chats/new/message', isLogged, createMessage);
+
+router.post('/chats/login', login);
+
+router.put('/chats/update/name', isLogged, updateChatName);
+
+router.put('/chats/update/message', isLogged, updateChatMessage);
+
+router.delete('/chats/delete/:id', isLogged, deleteChat);
 
 export default router;

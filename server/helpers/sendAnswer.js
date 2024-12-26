@@ -40,7 +40,7 @@ export const sendAnswer = async (req, res, next, username, chatID) => {
 				// Search for the record
 				//change from:to so, username2 is sending answer
 				const result = await chatsCollection.updateOne(
-					{_id: chatID}, // Filter nach Chat-ID
+					{_id: chatID}, // Filter with Chat-ID
 					{
 						$push: {
 							messages: {

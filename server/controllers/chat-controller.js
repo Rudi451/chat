@@ -92,7 +92,7 @@ export const getChat = async (req, res, next) => {
 };
 /**__________________________________________________________________________________________________
  */
-export const updateChatMessage = async (req, res, next) => {
+export const createMessage = async (req, res, next) => {
 	const {from, to, message} = req.query;
 
 	if (!from || !to || !message) {
@@ -160,99 +160,160 @@ export const updateChatMessage = async (req, res, next) => {
 		next(new HttpError('Internal server error', 500));
 	}
 };
-/**__________________________________________________________________________________________________
+/**
+ * update only main chat record and user record and keep
+ * the old name is in the previous messages in the chats
  */
+
 export const updateChatName = async (req, res, next) => {
-	//TODO: turn on users when the users db will be ready
-	//
-	//require in params: old name, new name and chat id
 	try {
-		const {username, usernameNew, userId} = req.query;
-		console.log(
-			'username, usernameNew, userId: ',
-			username,
-			usernameNew,
-			userId
-		);
-		// Validate parameters
-		// if (!username || !usernameNew || !userId || !ObjectId.isValid(userId)) {
-		// 	return next(new HttpError('Invalid or missing parameters', 400));
-		// }
-		if (!username || !usernameNew) {
+		const {username, usernameNew} = req.query;
+		console.log('username, usernameNew: ', username, usernameNew);
+
+		if (!username || !usernameNew || username !== req.session.username) {
 			return next(new HttpError('Invalid or missing parameters', 400));
 		}
+		//Update in the Chat collection
+		const collection = db.collection('chats');
+		const cursor = collection.find({});
+		while (await cursor.hasNext()) {
+			const document = await cursor.next();
 
-		// 1. Find the user by ID and verify if they exist
-		// const user = await db
-		// 	.collection('users')
-		// 	.findOne({_id: ObjectId.createFromHexString(userId)});
+			let updatedDocument = {...document};
 
-		// if (!user) {
-		// 	return next(new HttpError('User not found', 404));
-		// }
-
-		// 2. Update all chats involving the user with the new username
-
-		// const result = await db.collection('chats').updateMany(
-		// 	{participants: username},
-		// 	{$set: {'participants.$': usernameNew}} // Update only the specific entry in the participants array
-		// );
-		const result = await db.collection('chats').updateMany(
-			{
-				username1: username,
-			},
-			{
-				$set: {username1: username},
+			for (let key in updatedDocument) {
+				if (updatedDocument[key] === username) {
+					updatedDocument[key] = usernameNew;
+				}
+				await collection.updateOne(
+					{_id: document._id},
+					{$set: updatedDocument}
+				);
 			}
-		);
-		const result2 = await db.collection('chats').updateMany(
-			{
-				$or: [{username2: username}],
-			},
-			{
-				$set: {username2: username},
-			}
-		);
-		console.log('result: ', result);
-		if (!result || result.modifiedCount === 0) {
-			return next(new HttpError('Error when writing to database', 400));
 		}
+		//Update in the users collection
+		const userCollection = db.collection('users');
+		const userCursor = userCollection.find({});
 
-		// 3. Update the user's record to use the new username
-		// await db
-		// 	.collection('users')
-		// 	.updateOne(
-		// 		{_id: ObjectId.createFromHexString(userId)},
-		// 		{$set: {username: usernameNew}}
-		// 	);
+		while (await userCursor.hasNext()) {
+			const document = await userCursor.next();
 
+			let updatedDocument = {...document};
+
+			for (let key in updatedDocument) {
+				if (updatedDocument[key] === username) {
+					updatedDocument[key] = usernameNew;
+				}
+				await userCollection.updateOne(
+					{_id: document._id},
+					{$set: updatedDocument}
+				);
+			}
+		}
+		//Update the session parameters
+		req.session.username = usernameNew;
 		// Respond with success
 		res.status(200).json({message: 'Username updated successfully'});
 	} catch (err) {
 		console.error('Error updating chat name:', err);
 		next(new HttpError('Internal server error', 500));
 	}
-
-	// find user in db via id, and if there is a one -> update all chats with this user
-
-	// find main record with names
-	// find current name
-	// update name
-	//TODO: HOW you call all of the parts of database mongo db, records, collections etc ? //
-	/**
-	 * update only main chat record and user record and keep
-	 * the old name is in the previous messages in the chats
-	 */
-	//TODO: end
 };
+/**__________________________________________________________________________________________________
+ */
 export const chatSearch = async (req, res, next) => {
-	// get request
-	//
-	// require: search params
-	// find the records with this params
-	// check : if is username -> show only chat with user (res object {type: chat, chatID: _id })
-	//         if is message -> show chat and this message with date (res object {type: message, chatID: _id})
-	//         if no data -> no chats found
+	const {key} = req.query;
+
+	if (!key) {
+		next(new HttpError('Search key is required', 400));
+	}
+
+	console.log('search: ', key);
+	try {
+		// find the records with this params
+		const collection = db.collection('chats');
+		let response = [];
+		const chats = await collection.find({}).toArray();
+
+		//i want to look in the array chats[0].username1 or chats[0].username2 === search -> response.push({type: user, id: userID, username: username})
+		// look in the chats[0].messages[i] => contain "word" -> response.push({type: message, chatid: id, from: username, date: createdAt})
+		chats.forEach((chat) => {
+			// Look in the messages
+			chat.messages.forEach((message) => {
+				if (message.message.includes(key)) {
+					response.push({
+						type: 'message',
+						chatId: chat._id.toString(),
+						from: message.from || message.username,
+						date: message.created,
+					});
+				}
+			});
+		});
+		// find the records in the users with this params
+		const userCollection = db.collection('users');
+
+		const users = await userCollection.find({}).toArray();
+
+		// look in the users and if word found -> response.push({type: user, id: userID, username})
+		users.forEach((user) => {
+			// Suche nach dem Suchwort im Benutzernamen
+			if (user.name.includes(key)) {
+				response.push({
+					type: 'user',
+					id: user._id.toString(),
+					username: user.name,
+				});
+			}
+		});
+		// successful response
+		console.log('response: ', response);
+		res.send(response);
+	} catch (err) {
+		console.log('Error during search: ', err);
+		next(new HttpError('An error occurred during the search process.', 500));
+	}
+};
+/**__________________________________________________________________________________________________
+ */
+export const updateChatMessage = async (req, res, next) => {
+	const {oldText, newText, chatId, from} = req.query;
+	if (
+		!oldText ||
+		!newText ||
+		!chatId ||
+		!from ||
+		from !== req.session.username
+	) {
+		next(new HttpError('Parameters required', 402));
+	}
+
+	try {
+		const collection = db.collection('chats');
+
+		// look for the message
+		const chat = await collection.findOne({
+			_id: ObjectId.createFromHexString(chatId),
+		});
+
+		// Find and update the message
+		const updatedMessages = chat.messages.map((message) => {
+			if (message.from === from && message.message === oldText) {
+				return {...message, message: newText};
+			}
+			return message;
+		});
+
+		// Update the chat document
+		await collection.updateOne(
+			{_id: ObjectId.createFromHexString(chatId)},
+			{$set: {messages: updatedMessages}}
+		);
+		//successful response
+		res.send({message: 'Message successful updated'});
+	} catch (err) {
+		next(new HttpError('Error with message update ', 500));
+	}
 };
 
 /**__________________________________________________________________________________________________
