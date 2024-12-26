@@ -1,26 +1,37 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import MessageInput from './MessageInput';
+import {AppContext} from '../context/AppContext';
 
 const ChatArea = () => {
-	const [messages, setMessages] = useState([
-		{sender: 'me', text: 'Hello!'},
-		{sender: 'Alice', text: 'Hi! How are you?'},
-	]);
+	const {LoggedIn, username, chat} = useContext(AppContext);
+	const [messages, setMessages] = useState([]);
+
+	const conversationPartner =
+		chat.username2 === username ? chat.username1 : chat.username2;
+
+	// UseEffect will be call always when conversationsPartner is changed
+	useEffect(() => {
+		const originalMessages = chat.messages;
+
+		const transformedMessages = transformMessages(originalMessages);
+		setMessages(transformedMessages);
+	}, [conversationPartner]);
 
 	const handleSendMessage = (messageText) => {
 		if (messageText.trim()) {
-			setMessages([...messages, {sender: 'me', text: messageText}]);
+			setMessages([
+				...transformMessages(chat.messages),
+				{sender: username, text: messageText},
+			]);
 		}
 	};
 
 	return (
 		<div>
 			<div>
-				{/* Hier den aktuelle Chat-User mit Icon und Namen */}
-				<h3>Chat with Alice</h3>
-				<img src='https://via.placeholder.com/40' alt='Alice Icon' />
+				<h3>Chat with {conversationPartner || 'User'}</h3>
 			</div>
-			{/* Hier die Message-History */}
+
 			<div
 				style={{
 					height: '400px',
@@ -31,17 +42,37 @@ const ChatArea = () => {
 				{messages.map((msg, index) => (
 					<div
 						key={index}
-						style={{textAlign: msg.sender === 'me' ? 'right' : 'left'}}>
+						style={{textAlign: msg.sender === username ? 'right' : 'left'}}>
 						<p>{msg.text}</p>
 					</div>
 				))}
 			</div>
 			<div style={{marginTop: '1rem'}}>
-				{/* MessageInput mit Callback */}
 				<MessageInput onSendMessage={handleSendMessage} />
 			</div>
 		</div>
 	);
+};
+
+const transformMessages = (messages) => {
+	let transformed;
+	if (messages) {
+		transformed = messages.map((message) => ({
+			sender: message.from,
+			text: message.message,
+		}));
+	} else {
+		transformed = [
+			[
+				{
+					from: 'Alice',
+					message: 'Hi Ronald',
+				},
+			],
+		];
+	}
+
+	return transformed;
 };
 
 export default ChatArea;

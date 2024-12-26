@@ -10,7 +10,7 @@ function App() {
 	return (
 		<AppProvider>
 			<div className='app-container'>
-				<div className='left-section'>
+				<div className='section'>
 					<UserPanel />
 					<ChatList />
 				</div>
