@@ -61,13 +61,44 @@ export const createChat = async (req, res, next) => {
 };
 /**__________________________________________________________________________________________________
  */
-export const updateChat = async (req, res, next) => {
+export const getChat = async (req, res, next) => {
+	// require: chat id_
+	// res.send -> object from db record with all messages history
+	try {
+		const {id} = req.query;
+		// console.log('id is:', id);
+		// Valid the ID
+		if (!id || !ObjectId.isValid(id)) {
+			next(new HttpError('Invalid or missing ID', 400));
+		}
+
+		// set connection to the database
+		const chatsCollection = db.collection('chats');
+
+		// Search for document with the corresponding ID
+		const chat = await chatsCollection.findOne({
+			_id: ObjectId.createFromHexString(id),
+		});
+
+		if (!chat) {
+			next(new HttpError(' Chat not found ', 404));
+		}
+
+		//Successful response
+		res.status(200).json(chat);
+	} catch (error) {
+		next(new HttpError('Internal server error', 500));
+	}
+};
+/**__________________________________________________________________________________________________
+ */
+export const updateChatMessage = async (req, res, next) => {
 	const {from, to, message} = req.query;
 
 	if (!from || !to || !message) {
-		return res.status(400).json({
-			error: 'Missing required parameters: from, to, or message.',
-		});
+		return next(
+			new HttpError('Missing required parameters: from, to, or message', 400)
+		);
 	}
 
 	try {
@@ -120,15 +151,108 @@ export const updateChat = async (req, res, next) => {
 
 			if (result.acknowledged) {
 				sendAnswer(req, res, next, to, result._id);
-				// return res.json({message: 'New chat created, and message added.'});
 			} else {
 				throw new Error('Failed to create chat.');
 			}
 		}
 	} catch (err) {
 		console.error('Error updating chat:', err);
-		return res.status(500).json({error: 'Internal server error.'});
+		next(new HttpError('Internal server error', 500));
 	}
+};
+/**__________________________________________________________________________________________________
+ */
+export const updateChatName = async (req, res, next) => {
+	//TODO: turn on users when the users db will be ready
+	//
+	//require in params: old name, new name and chat id
+	try {
+		const {username, usernameNew, userId} = req.query;
+		console.log(
+			'username, usernameNew, userId: ',
+			username,
+			usernameNew,
+			userId
+		);
+		// Validate parameters
+		// if (!username || !usernameNew || !userId || !ObjectId.isValid(userId)) {
+		// 	return next(new HttpError('Invalid or missing parameters', 400));
+		// }
+		if (!username || !usernameNew) {
+			return next(new HttpError('Invalid or missing parameters', 400));
+		}
+
+		// 1. Find the user by ID and verify if they exist
+		// const user = await db
+		// 	.collection('users')
+		// 	.findOne({_id: ObjectId.createFromHexString(userId)});
+
+		// if (!user) {
+		// 	return next(new HttpError('User not found', 404));
+		// }
+
+		// 2. Update all chats involving the user with the new username
+
+		// const result = await db.collection('chats').updateMany(
+		// 	{participants: username},
+		// 	{$set: {'participants.$': usernameNew}} // Update only the specific entry in the participants array
+		// );
+		const result = await db.collection('chats').updateMany(
+			{
+				username1: username,
+			},
+			{
+				$set: {username1: username},
+			}
+		);
+		const result2 = await db.collection('chats').updateMany(
+			{
+				$or: [{username2: username}],
+			},
+			{
+				$set: {username2: username},
+			}
+		);
+		console.log('result: ', result);
+		if (!result || result.modifiedCount === 0) {
+			return next(new HttpError('Error when writing to database', 400));
+		}
+
+		// 3. Update the user's record to use the new username
+		// await db
+		// 	.collection('users')
+		// 	.updateOne(
+		// 		{_id: ObjectId.createFromHexString(userId)},
+		// 		{$set: {username: usernameNew}}
+		// 	);
+
+		// Respond with success
+		res.status(200).json({message: 'Username updated successfully'});
+	} catch (err) {
+		console.error('Error updating chat name:', err);
+		next(new HttpError('Internal server error', 500));
+	}
+
+	// find user in db via id, and if there is a one -> update all chats with this user
+
+	// find main record with names
+	// find current name
+	// update name
+	//TODO: HOW you call all of the parts of database mongo db, records, collections etc ? //
+	/**
+	 * update only main chat record and user record and keep
+	 * the old name is in the previous messages in the chats
+	 */
+	//TODO: end
+};
+export const chatSearch = async (req, res, next) => {
+	// get request
+	//
+	// require: search params
+	// find the records with this params
+	// check : if is username -> show only chat with user (res object {type: chat, chatID: _id })
+	//         if is message -> show chat and this message with date (res object {type: message, chatID: _id})
+	//         if no data -> no chats found
 };
 
 /**__________________________________________________________________________________________________

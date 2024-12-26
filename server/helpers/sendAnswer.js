@@ -44,7 +44,7 @@ export const sendAnswer = async (req, res, next, username, chatID) => {
 					{
 						$push: {
 							messages: {
-								username,
+								from: username,
 								message: quote,
 								created: new Date(),
 							},

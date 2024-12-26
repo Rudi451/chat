@@ -5,8 +5,10 @@ import HttpError from '../helpers/HttpError.js';
 import {
 	createChat,
 	getAllChats,
-	updateChat,
+	updateChatMessage,
 	deleteChat,
+	getChat,
+	updateChatName,
 } from '../controllers/chat-controller.js';
 
 const router = express.Router();
@@ -22,7 +24,10 @@ router.get('/', async (req, res) => {
 
 router.get('/chats', getAllChats);
 
-router.put('/chats/update', updateChat);
+router.get('/chat', getChat);
+
+router.put('/chats/update', updateChatMessage);
+router.put('/chats/updateName', updateChatName);
 
 router.post('/chats/new', createChat);
 
