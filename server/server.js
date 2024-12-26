@@ -1,7 +1,7 @@
 import express from 'express';
-import cors from 'cors';
-import resourcesRouter from './routes/resource-routes.js';
 
+import resourcesRouter from './routes/resource-routes.js';
+import cors from 'cors';
 import * as dotenv from 'dotenv';
 import {CentralErrorHandler} from './middleware/centralErrorHandler.js';
 import serverSetup from './middleware/serverSetup.js';
@@ -10,9 +10,9 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5050;
 const app = express();
-
-app.use(serverSetup);
 app.use(cors());
+app.use(serverSetup);
+
 app.use(express.json());
 
 app.use('/api/resources', resourcesRouter);
