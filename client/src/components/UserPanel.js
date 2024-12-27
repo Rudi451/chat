@@ -48,18 +48,18 @@ const UserPanel = () => {
 				<span>{LoggedIn ? username : 'Guest'}</span>
 				{!LoggedIn ? (
 					<div>
-						<button onClick={() => setDialogOpen(true)}>Login</button>
-						{dialogOpen && (
-							<div className='dialog'>
-								<input
-									type='text'
-									placeholder='Enter Username'
-									value={inputUsername}
-									onChange={(e) => setInputUsername(e.target.value)}
-								/>
-								<button onClick={handleLogin}>Login</button>
-							</div>
-						)}
+						{/* <button onClick={() => setDialogOpen(true)}>Login</button> */}
+						{/* {dialogOpen && ( */}
+						<div className='dialog'>
+							<input
+								type='text'
+								placeholder='Enter Username'
+								value={inputUsername}
+								onChange={(e) => setInputUsername(e.target.value)}
+							/>
+							<button onClick={handleLogin}>Login</button>
+						</div>
+						{/* )} */}
 					</div>
 				) : (
 					<button onClick={handleLogout}>Logout</button>

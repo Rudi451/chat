@@ -40,6 +40,7 @@ export const createChat = async (req, res, next) => {
 		const newChatData = {
 			username1,
 			username2,
+			messages: [],
 		};
 
 		const result = await db.collection('chats').insertOne(newChatData);

@@ -5,6 +5,7 @@ import {AppContext} from '../context/AppContext';
 import RandomIcon from './RandomIcon';
 import ChatButton from './ChatButton';
 import ChatArea from './ChatArea';
+import NewChat from './NewChat';
 
 // const useChat = () => {
 // 	return useContext(AppContext);
@@ -63,7 +64,7 @@ const ChatList = () => {
 	}
 
 	const handleChatClick = (chat) => {
-		// console.log('clicked chat: ', chat);
+		console.log('clicked chat: ', chat);
 		setChat(chat); // Update the context value
 	};
 
@@ -82,7 +83,9 @@ const ChatList = () => {
 					{chatList.length > 0 ? (
 						chatList.map((chat, index) => (
 							<ChatButton
-								key={chat.username1 || index}
+								key={
+									chat.username1 === username ? chat.username2 : index || index
+								}
 								chat={chat}
 								onClick={handleChatClick}
 							/>
@@ -92,11 +95,13 @@ const ChatList = () => {
 					)}
 				</ul>
 			</div>
+			<NewChat />
 		</div>
 	);
 };
 
 const filterAndSortChats = (chats, currentNickname) => {
+	let sortedChats;
 	// Filter the chats to include only those where the user is involved
 	const filteredChats = chats.filter(
 		(chat) =>
@@ -104,12 +109,17 @@ const filterAndSortChats = (chats, currentNickname) => {
 	);
 
 	// Sort chats by the timestamp of the latest message (descending order)
-	const sortedChats = filteredChats.sort((a, b) => {
-		const latestMessageA = a.messages[a.messages.length - 1]?.created;
-		const latestMessageB = b.messages[b.messages.length - 1]?.created;
+	const length = 1;
+	if (length) {
+		sortedChats = filteredChats.sort((a, b) => {
+			const latestMessageA = a.messages[a.messages.length - 1]?.created;
+			const latestMessageB = b.messages[b.messages.length - 1]?.created;
 
-		return new Date(latestMessageB) - new Date(latestMessageA); // Newer messages come first
-	});
+			return new Date(latestMessageB) - new Date(latestMessageA); // Newer messages come first
+		});
+	} else {
+		sortedChats = [];
+	}
 
 	return sortedChats;
 };

@@ -6,8 +6,12 @@ const ChatArea = () => {
 	const {LoggedIn, username, chat} = useContext(AppContext);
 	const [messages, setMessages] = useState([]);
 
-	const conversationPartner =
+	let conversationPartner =
 		chat.username2 === username ? chat.username1 : chat.username2;
+
+	if (!LoggedIn) {
+		conversationPartner = 'User';
+	}
 
 	// UseEffect will be call always when conversationsPartner is changed
 	useEffect(() => {
@@ -15,14 +19,15 @@ const ChatArea = () => {
 
 		const transformedMessages = transformMessages(originalMessages);
 		setMessages(transformedMessages);
+
+		if (!LoggedIn) {
+			setMessages([]);
+		}
 	}, [conversationPartner]);
 
 	const handleSendMessage = (messageText) => {
 		if (messageText.trim()) {
-			setMessages([
-				...transformMessages(chat.messages),
-				{sender: username, text: messageText},
-			]);
+			setMessages([...messages, {sender: username, text: messageText}]);
 		}
 	};
 
