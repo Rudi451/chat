@@ -5,7 +5,11 @@ import cors from 'cors';
 import * as dotenv from 'dotenv';
 import {CentralErrorHandler} from './middleware/centralErrorHandler.js';
 import serverSetup from './middleware/serverSetup.js';
+import path from 'path';
 
+// const ENV_PATH = path.join(process.cwd(), '.env');
+// console.log('env path: ', ENV_PATH);
+// dotenv.config({path: ENV_PATH});
 dotenv.config();
 
 const PORT = process.env.PORT || 5050;
